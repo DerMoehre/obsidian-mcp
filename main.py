@@ -41,9 +41,11 @@ class SearchQuery(BaseModel):
     query: str = Field(description="The search query to use within the Obsidian vault.")
 
 
+class FilePath(BaseModel):
+    path: str = Field(description="The path to the file relative to the vault root.")
+
+
 # --- Define MCP Tools ---
-
-
 @mcp.tool()
 async def search_obsidian_vault(search_input: SearchQuery) -> str:  # Your tool name.
     """
@@ -64,7 +66,6 @@ async def search_obsidian_vault(search_input: SearchQuery) -> str:  # Your tool 
                         )
                         if search_input.query.lower() in file.lower():
                             results.append(f"File (filename match): {relative_path}")
-
                             continue
 
                         try:
@@ -112,6 +113,25 @@ async def search_obsidian_vault(search_input: SearchQuery) -> str:  # Your tool 
         return "Search Results:\n" + "\n---\n".join(results)
     else:
         return "No results found for your query."
+
+
+@mcp.tool()
+async def get_note_by_uri(search_input: FilePath) -> str:
+    """
+    Retrieves the full content of an Obsidian note by its vault-relative path or URI.
+    Provide the path to the note (e.g., 'Daily Notes/2025-05-28.md').
+    """
+    try:
+        full_path = _validate_path(OBSIDIAN_VAULT_ROOT, search_input.path)
+        with open(full_path, encoding="utf-8") as f:
+            content = f.read()
+        return content
+    except FileNotFoundError:
+        return f"Error: Note not found at path: {search_input.path}"
+    except ValueError as e:
+        return f"Error: Invalid path - {e}"
+    except Exception as e:
+        return f"Error reading note content: {e}"
 
 
 # --- Main entry point to run the server ---
