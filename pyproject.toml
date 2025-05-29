@@ -1,0 +1,42 @@
+[project]
+name = "obsidian-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastmcp>=2.5.1",
+    "httpx>=0.28.1",
+    "pydantic>=2.11.5",
+]
+
+[tool.ruff]
+# Exclude virtual environment and cached directories
+exclude = [
+    ".venv",
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+    ".ruff_cache",
+]
+
+# Maximum line length (adjust as you prefer, 88 is Black's default)
+line-length = 88 
+
+[tool.ruff.lint]
+# Enable common linting rules (E, F, B, I, W, N) and some others (UP, SIM, PL, C4, A)
+select = ["E", "F", "B", "I", "W", "N", "UP", "SIM", "PL", "C4", "A"]
+
+[tool.ruff.format]
+# Like Black, but integrated with Ruff's linter
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint.isort]
+# isort specific configuration for import sorting
+# List any top-level packages within your project here if they are not in a standard src/ layout
+known-first-party = ["mcp"] 
+force-single-line = false
