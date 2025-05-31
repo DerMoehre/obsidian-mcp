@@ -37,8 +37,8 @@ def _validate_path(base_path: str, relative_path: str) -> str:
 
 
 # --- Define Pydantic Models for Tool Inputs (Improves AI understanding) ---
-class SearchQuery(BaseModel):
-    query: str = Field(description="The search query to use within the Obsidian vault.")
+# class SearchQuery(BaseModel):
+# query: str = Field(description="The search query to use within the Obsidian vault.")
 
 
 class FilePath(BaseModel):
@@ -47,11 +47,17 @@ class FilePath(BaseModel):
 
 # --- Define MCP Tools ---
 @mcp.tool()
-async def search_obsidian_vault(search_input: SearchQuery) -> str:  # Your tool name.
+async def search_obsidian_vault(
+    query: str = Field(
+        description="The search query to use within the Obsidian vault."
+    ),
+) -> str:  # Your tool name.
     """
     Searches the Obsidian vault for notes matching the query.
     Returns a summarized list of matching file paths and content snippets.
     """
+    if query is None:
+        return "Error: No search query was provided. Please specify what to search for."
 
     results = []
 
@@ -64,7 +70,7 @@ async def search_obsidian_vault(search_input: SearchQuery) -> str:  # Your tool 
                         relative_path = os.path.relpath(
                             current_full_file_path, OBSIDIAN_VAULT_ROOT
                         )
-                        if search_input.query.lower() in file.lower():
+                        if query.lower() in file.lower():
                             results.append(f"File (filename match): {relative_path}")
                             continue
 
@@ -77,10 +83,8 @@ async def search_obsidian_vault(search_input: SearchQuery) -> str:  # Your tool 
                             ) as f:
                                 content = f.read()
 
-                            if search_input.query.lower() in content.lower():
-                                snippet_start = content.lower().find(
-                                    search_input.query.lower()
-                                )
+                            if query.lower() in content.lower():
+                                snippet_start = content.lower().find(query.lower())
                                 snippet = content[
                                     max(0, snippet_start - 50) : min(
                                         len(content),
